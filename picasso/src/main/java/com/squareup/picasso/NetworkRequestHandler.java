@@ -71,6 +71,16 @@ class NetworkRequestHandler extends RequestHandler {
     if (loadedFrom == NETWORK && response.getContentLength() > 0) {
       stats.dispatchDownloadFinished(response.getContentLength());
     }
+
+    try {
+      MarkableInputStream markableIs = new MarkableInputStream(is);
+      is = markableIs;
+      int orientation = ExifStreamReader.getOrientation(markableIs);
+      return new Result(null, markableIs, loadedFrom, orientation);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
     return new Result(is, loadedFrom);
   }
 

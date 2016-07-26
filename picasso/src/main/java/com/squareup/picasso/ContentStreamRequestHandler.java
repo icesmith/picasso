@@ -36,7 +36,14 @@ class ContentStreamRequestHandler extends RequestHandler {
   }
 
   @Override public Result load(Request request, int networkPolicy) throws IOException {
-    return new Result(getInputStream(request), DISK);
+    try {
+      InputStream is = getInputStream(request);
+      MarkableInputStream ignored = new MarkableInputStream(is);
+      int orientation = ExifStreamReader.getOrientation(ignored);
+      return new Result(null, getInputStream(request), DISK, orientation);
+    } catch (Exception e) {
+      return new Result(getInputStream(request), DISK);
+    }
   }
 
   InputStream getInputStream(Request request) throws FileNotFoundException {
